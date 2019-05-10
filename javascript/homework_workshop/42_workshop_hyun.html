@@ -1,0 +1,42 @@
+<!-- v-on 디렉티브를 활용하여, 다음과 같이 ‘+1’ 버튼을 누르면 숫자가 하나씩 증가하는
+Counter 앱을 만들어 봅시다. -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>workshop</title>
+</head>
+
+<body>
+
+  <div id="divCounter">
+    <button @click="increase">+1</button>
+    <p>Counter: {{ increaseCom }}</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script>
+    new Vue({
+      el: "#divCounter",
+      data: {
+        counter: 0
+      },
+      methods: {
+        increase: function () {
+          this.counter += 1
+        }
+      },
+      computed: {
+        increaseCom: function () {
+          return this.counter
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>

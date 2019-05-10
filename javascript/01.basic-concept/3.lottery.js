@@ -1,0 +1,6 @@
+var _ = require('lodash')
+var numbers = _.range(1,46)
+var picks = _.sampleSize(numbers, 6)
+picks.sort()
+// console.log(`오늘의 행운의 번호는 ${picks}`)
+console.log()
