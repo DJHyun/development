@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Document</title>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+
+<body>
+  <h1>Movie App</h1>
+  <div id="main">
+    <!-- list -->
+    <div class="movie-entry-box" v-if="!isDetailPage">
+      <button type="button" @click="getMovies">전체</button>
+      <button type="button" v-for="genre in genres" @click="setGenres(genre.id)">{{genre.name}}</button>
+      <div class="movie-entry" v-for="movie in movies" @click="setCurrentMovie(movie)">
+        <p>{{ movie.title }}</p>
+        <img :src="movie.poster_url" :alt="movie.title">
+      </div>
+    </div>
+
+    <!-- detail -->
+    <div class="movie-detail" v-if="isDetailPage">
+      <h4>{{ currentMovie.title }}</h4>
+      <img :src="currentMovie.poster_url" :alt="currentMovie.title">
+      <p>{{ currentMovie.description }}</p>
+      <p>누적 관객 : {{ currentMovie.audience }}</p>
+      <p>장르 : {{ currentMovie.genre.name }}</p>
+      <p>평균 점수 : {{ averageScore }}</p>
+      <div v-for="movieReview in movieReviews">
+        <hr />
+        <p>{{ movieReview.content}}</p>
+        <p>Score: {{movieReview.score}}</p>
+      </div>
+      <textarea v-model="review.content"></textarea>
+      <input v-model="review.score" type="number" min="0" max="5" />
+      <button type="button" @click="postReview(currentMovie.id)">Review</button>
+      <button type="button" @click="togglePage">BACK</button>
+    </div>
+  </div>
+  <script>
+    const app = new Vue({
+      el: '#main',
+      data: {
+        API_URL: "http://70.12.107.80:8000/api/v1/",
+        movies: [],
+        isDetailPage: false,
+        currentMovie: {},
+        review: {
+          content: '',
+          score: 0,
+        },
+        movieReviews: [],
+        genres: [],
+      },
+      methods: {
+        togglePage: function () {
+          this.isDetailPage = !this.isDetailPage
+        },
+        getMovies: function () {
+          axios.get(this.API_URL + 'movies/')
+            .then(response => {
+              this.movies = response.data
+            })
+        },
+        setCurrentMovie: function (movie) {
+          this.currentMovie = movie
+          this.togglePage()
+          this.getMovieReviews(movie.id)
+        },
+        postReview: function (id) {
+          axios.post(`${this.API_URL}movies/${id}/scores/`, this.review)
+            .then(response => {
+              alert(response.data.message)
+              this.review.content = ''
+              this.review.score = ''
+              this.getMovieReviews(id)
+            })
+        },
+        getMovieReviews: function (id) {
+          axios.get(`${this.API_URL}movies/${id}/scores/`)
+            .then(response => {
+              this.movieReviews = response.data
+            })
+        },
+        getGenres: function () {
+          axios.get(`${this.API_URL}genres/`)
+            .then(response => {
+              this.genres = response.data
+            })
+        },
+        setGenres: function (genreid) {
+          axios.get(`${this.API_URL}genres/${genreid}/`)
+            .then(response => {
+              this.movies = response.data.movies
+            })
+        }
+      },
+      computed:{
+        averageScore:function(){
+          // 다 더한다. 나눈다.
+          let sum = 0
+          this.movieReviews.forEach(review => {
+            sum = sum + review.score
+          });
+          return sum/ this.movieReviews.length
+        }
+      },
+      created: function () {
+        this.getMovies()
+        this.getGenres()
+      }
+    })
+  </script>
+</body>
+
+</html>
